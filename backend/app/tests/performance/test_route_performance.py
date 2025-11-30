@@ -1,79 +1,149 @@
 """
 Performance Tests - Route Calculation
 Benchmarks for route calculation performance.
+
+Note: These tests benchmark the calculation algorithms without requiring
+database or cache infrastructure. Full performance tests should be run
+with docker-compose for accurate end-to-end measurements.
 """
 
 import time
 import pytest
-from typing import List
 
-from app.services.route_planner import MaritimeRoutePlanner
+from app.utils.maritime_calculations import (
+    GreatCircleCalculator,
+    FuelConsumptionCalculator,
+    TransitTimeEstimator
+)
+from app.models.maritime import Coordinates, VesselConstraints, VesselType
 
 
 @pytest.mark.performance
-class TestRoutePerformance:
-    """Performance tests for route calculations."""
+class TestCalculationPerformance:
+    """Performance tests for maritime calculations."""
     
-    def test_simple_route_under_500ms(self):
-        """Simple route calculation should complete under 500ms."""
-        planner = MaritimeRoutePlanner()
-        
-        # Sample ports
-        ports = [
-            {"code": "SGSIN", "lat": 1.2644, "lon": 103.8220},
-            {"code": "NLRTM", "lat": 51.9225, "lon": 4.4792}
-        ]
+    def test_distance_calculation_under_1ms(self):
+        """Distance calculation should complete under 1ms."""
+        origin = Coordinates(latitude=1.2644, longitude=103.8220)  # Singapore
+        destination = Coordinates(latitude=51.9225, longitude=4.4792)  # Rotterdam
         
         start_time = time.time()
         
-        # This tests the calculation logic (without database)
-        # In production, would test actual API response time
-        result = planner._calculate_direct_distance(
-            ports[0]["lat"], ports[0]["lon"],
-            ports[1]["lat"], ports[1]["lon"]
-        )
+        result = GreatCircleCalculator.calculate_distance_nautical_miles(origin, destination)
         
         duration_ms = (time.time() - start_time) * 1000
         
-        assert duration_ms < 500, f"Calculation took {duration_ms}ms"
+        assert duration_ms < 1, f"Calculation took {duration_ms}ms, expected < 1ms"
         assert result > 0
     
-    def test_multiple_calculations_performance(self):
-        """Multiple calculations should maintain performance."""
-        planner = MaritimeRoutePlanner()
+    def test_bearing_calculation_under_1ms(self):
+        """Bearing calculation should complete under 1ms."""
+        origin = Coordinates(latitude=1.2644, longitude=103.8220)
+        destination = Coordinates(latitude=51.9225, longitude=4.4792)
         
-        # Test 100 calculations
-        calculations = 100
+        start_time = time.time()
+        
+        result = GreatCircleCalculator.calculate_initial_bearing(origin, destination)
+        
+        duration_ms = (time.time() - start_time) * 1000
+        
+        assert duration_ms < 1, f"Calculation took {duration_ms}ms, expected < 1ms"
+        assert 0 <= result < 360
+    
+    def test_fuel_estimation_under_10ms(self):
+        """Fuel consumption estimation should complete under 10ms."""
+        vessel = VesselConstraints(
+            vessel_type=VesselType.CONTAINER,
+            length_meters=300,
+            beam_meters=45,
+            draft_meters=14,
+            cruise_speed_knots=18,
+            deadweight_tonnage=50000
+        )
+        
+        start_time = time.time()
+        
+        result = FuelConsumptionCalculator.estimate_consumption(8500, vessel)
+        
+        duration_ms = (time.time() - start_time) * 1000
+        
+        assert duration_ms < 10, f"Calculation took {duration_ms}ms, expected < 10ms"
+        assert result > 0
+    
+    def test_transit_time_under_1ms(self):
+        """Transit time estimation should complete under 1ms."""
+        start_time = time.time()
+        
+        result = TransitTimeEstimator.estimate_transit_time(8500, 18)
+        
+        duration_ms = (time.time() - start_time) * 1000
+        
+        assert duration_ms < 1, f"Calculation took {duration_ms}ms, expected < 1ms"
+        assert result > 0
+
+
+@pytest.mark.performance
+class TestBatchPerformance:
+    """Batch performance tests."""
+    
+    def test_multiple_distance_calculations(self):
+        """Multiple distance calculations should maintain performance."""
+        origin = Coordinates(latitude=1.2644, longitude=103.8220)
+        destination = Coordinates(latitude=51.9225, longitude=4.4792)
+        
+        calculations = 1000
         start_time = time.time()
         
         for _ in range(calculations):
-            planner._calculate_direct_distance(
-                1.2644, 103.8220,
-                51.9225, 4.4792
-            )
+            GreatCircleCalculator.calculate_distance_nautical_miles(origin, destination)
         
         total_duration_ms = (time.time() - start_time) * 1000
         avg_duration_ms = total_duration_ms / calculations
         
-        assert avg_duration_ms < 10, f"Average calculation took {avg_duration_ms}ms"
-    
-    def test_cache_performance(self):
-        """Cache lookups should be sub-millisecond."""
-        # Placeholder for cache performance test
-        # Would test Redis cache hit performance
-        pass
+        # Each calculation should average under 0.1ms
+        assert avg_duration_ms < 0.1, f"Average calculation took {avg_duration_ms}ms"
+        
+        # 1000 calculations should complete under 100ms total
+        assert total_duration_ms < 100, f"Total time was {total_duration_ms}ms"
 
 
 @pytest.mark.performance
-class TestMemoryUsage:
-    """Memory usage tests."""
+class TestKPICompliance:
+    """Tests to verify KPI targets from prompt.md."""
     
-    def test_planner_memory_footprint(self):
-        """Route planner should have reasonable memory footprint."""
-        import sys
+    def test_simple_route_calculation_kpi(self):
+        """Verify simple route calculations meet <500ms KPI target.
         
-        planner = MaritimeRoutePlanner()
-        size = sys.getsizeof(planner)
+        Note: This tests calculation logic only. Full end-to-end
+        route calculation with database would be tested with docker-compose.
+        """
+        origin = Coordinates(latitude=1.2644, longitude=103.8220)
+        destination = Coordinates(latitude=51.9225, longitude=4.4792)
         
-        # Should be under 10MB
-        assert size < 10 * 1024 * 1024
+        vessel = VesselConstraints(
+            vessel_type=VesselType.CONTAINER,
+            length_meters=300,
+            beam_meters=45,
+            draft_meters=14,
+            cruise_speed_knots=18,
+            deadweight_tonnage=50000
+        )
+        
+        start_time = time.time()
+        
+        # Simulate full calculation pipeline
+        distance = GreatCircleCalculator.calculate_distance_nautical_miles(origin, destination)
+        bearing = GreatCircleCalculator.calculate_initial_bearing(origin, destination)
+        fuel = FuelConsumptionCalculator.estimate_consumption(distance, vessel)
+        transit_time = TransitTimeEstimator.estimate_transit_time(distance, vessel.cruise_speed_knots)
+        
+        duration_ms = (time.time() - start_time) * 1000
+        
+        # KPI target is <500ms for simple routes
+        assert duration_ms < 500, f"Calculation pipeline took {duration_ms}ms, KPI target is <500ms"
+        
+        # Verify results are valid
+        assert distance > 5000  # Singapore to Rotterdam is ~6000nm
+        assert 0 <= bearing < 360
+        assert fuel > 0
+        assert transit_time > 0

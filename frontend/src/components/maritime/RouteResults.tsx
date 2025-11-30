@@ -7,11 +7,9 @@ import React from 'react';
 import { 
   Clock, 
   DollarSign, 
-  Fuel, 
   Anchor, 
   Shield, 
   Leaf,
-  ChevronRight,
   Check
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui';

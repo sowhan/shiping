@@ -6,7 +6,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { portApi } from '../services/api';
-import type { Port } from '../types/maritime';
 
 interface UsePortSearchOptions {
   debounceMs?: number;

@@ -5,10 +5,11 @@ Pytest fixtures and test database setup.
 
 import asyncio
 from typing import AsyncGenerator, Generator
+from datetime import datetime, timedelta
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from fastapi import FastAPI
 
 from app.main import app
@@ -25,17 +26,20 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 @pytest_asyncio.fixture
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
     """Create async HTTP client for API testing."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
 
 
 @pytest.fixture
 def sample_route_request() -> dict:
     """Sample route calculation request."""
+    # Use future departure time to pass validation
+    departure_time = (datetime.utcnow() + timedelta(days=1)).isoformat() + "Z"
     return {
         "origin_port_code": "SGSIN",
         "destination_port_code": "NLRTM",
-        "departure_time": "2024-01-20T08:00:00Z",
+        "departure_time": departure_time,
         "vessel_constraints": {
             "vessel_type": "container",
             "length_meters": 300,
@@ -57,7 +61,7 @@ def sample_route_request() -> dict:
 def sample_port() -> dict:
     """Sample port data."""
     return {
-        "id": 1,
+        "id": None,
         "unlocode": "SGSIN",
         "name": "Singapore",
         "country": "Singapore",
@@ -65,7 +69,7 @@ def sample_port() -> dict:
             "latitude": 1.2644,
             "longitude": 103.8220
         },
-        "port_type": "major_hub",
+        "port_type": "container_terminal",
         "operational_status": "active"
     }
 

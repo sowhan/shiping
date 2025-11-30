@@ -3,7 +3,7 @@
  * Persistent storage with type safety.
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   // Get initial value from storage or use provided initial value
