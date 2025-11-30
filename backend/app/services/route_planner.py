@@ -882,7 +882,7 @@ class MaritimeRoutePlanner:
     ) -> float:
         """Calculate environmental impact score.
         
-        Lower is better.Based on fuel consumption and emissions.
+        Lower is better. Based on fuel consumption and emissions.
         
         Args:
             segments: Route segments
