@@ -6,7 +6,7 @@ Enterprise Redis caching with intelligent strategy for maritime route planning.
 import json
 import zlib
 import hashlib
-from typing import Any, Optional, TypeVar, Generic
+from typing import Any, Optional
 from datetime import timedelta
 
 import redis.asyncio as redis
@@ -15,8 +15,6 @@ import structlog
 from app.core.config import settings
 
 logger = structlog.get_logger(__name__)
-
-T = TypeVar('T')
 
 
 class CacheService:

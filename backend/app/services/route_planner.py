@@ -13,7 +13,7 @@ Features:
 
 import asyncio
 import logging
-from typing import List, Optional, Dict, Any, Tuple, TYPE_CHECKING
+from typing import List, Optional, Dict, Any, Tuple
 from datetime import datetime, timedelta
 from decimal import Decimal
 import uuid
@@ -25,6 +25,7 @@ from geopy.distance import geodesic
 import structlog
 
 from app.core.database import DatabaseManager
+from app.core.cache import CacheService
 from app.models.maritime import (
     RouteRequest, RouteResponse, DetailedRoute, RouteSegment,
     Port, VesselConstraints, OptimizationCriteria, Coordinates
@@ -33,9 +34,6 @@ from app.utils.maritime_calculations import (
     calculate_great_circle_distance, estimate_fuel_consumption,
     calculate_port_fees, estimate_transit_time
 )
-
-if TYPE_CHECKING:
-    from app.core.cache import CacheService
 
 logger = structlog.get_logger(__name__)
 
@@ -56,7 +54,7 @@ class MaritimeRoutePlanner:
     - Cache hit ratio: >95% for repeated requests
     """
     
-    def __init__(self, db_manager: DatabaseManager, cache_service: Optional["CacheService"] = None):
+    def __init__(self, db_manager: DatabaseManager, cache_service: Optional[CacheService] = None):
         self.db_manager = db_manager
         self.cache_service = cache_service
         

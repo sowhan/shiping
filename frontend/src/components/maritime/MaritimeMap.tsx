@@ -8,8 +8,11 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useRouteStore } from '../../store/routeStore';
 
-// Set Mapbox access token from environment
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || '';
+// Set Mapbox access token from environment (empty string handled with fallback UI)
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+if (MAPBOX_TOKEN) {
+  mapboxgl.accessToken = MAPBOX_TOKEN;
+}
 
 interface MaritimeMapProps {
   className?: string;
@@ -193,14 +196,17 @@ export const MaritimeMap: React.FC<MaritimeMapProps> = ({ className = '' }) => {
   }, [originPort, destinationPort, mapLoaded]);
 
   // Check if Mapbox token is available
-  if (!mapboxgl.accessToken) {
+  if (!MAPBOX_TOKEN) {
     return (
       <div className={`${className} bg-slate-800 flex items-center justify-center`}>
         <div className="text-center text-white p-8">
           <div className="text-4xl mb-4">🗺️</div>
           <h3 className="text-lg font-semibold mb-2">Map Visualization</h3>
-          <p className="text-slate-400 text-sm">
-            Add your Mapbox access token to enable the interactive map.
+          <p className="text-slate-400 text-sm mb-2">
+            Mapbox access token required for interactive map.
+          </p>
+          <p className="text-amber-400 text-xs">
+            Set VITE_MAPBOX_TOKEN environment variable
           </p>
           <code className="block mt-4 text-xs bg-slate-700 p-2 rounded">
             VITE_MAPBOX_TOKEN=your_token_here
