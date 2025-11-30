@@ -1,7 +1,7 @@
 """
-Maritime calculation utilities with production-grade precision. 
+Maritime calculation utilities with production-grade precision.
 Implements industry-standard formulas for navigation, fuel consumption,
-cost estimation, and performance optimization. 
+cost estimation, and performance optimization.
 
 All calculations follow IMO standards and maritime industry best practices.
 """
@@ -47,7 +47,7 @@ class GreatCircleCalculator:
     Accounts for Earth's oblate spheroid shape for maximum accuracy.
     """
     
-    # Earth's radius in nautical miles (more precise than standard 3440. 065nm)
+    # Earth's radius in nautical miles (more precise than standard 3440.065nm)
     EARTH_RADIUS_NAUTICAL_MILES = 3440.0647948
     
     # Earth's radius in kilometers for intermediate calculations
@@ -75,9 +75,9 @@ class GreatCircleCalculator:
         Example:
             >>> calc = GreatCircleCalculator()
             >>> origin = Coordinates(latitude=40.7128, longitude=-74.0060)  # NYC
-            >>> dest = Coordinates(latitude=51.5074, longitude=-0. 1278)     # London
+            >>> dest = Coordinates(latitude=51.5074, longitude=-0.1278)     # London
             >>> distance = calc.calculate_distance_nautical_miles(origin, dest)
-            >>> print(f"NYC to London: {distance:. 1f}nm")
+            >>> print(f"NYC to London: {distance:.1f}nm")
             NYC to London: 2998.1nm
         """
         try:
@@ -95,7 +95,7 @@ class GreatCircleCalculator:
             # More accurate than simple spherical law of cosines for small distances
             haversine_a = (
                 math.sin(delta_lat / 2) ** 2 +
-                math.cos(lat1_rad) * math.cos(lat2_rad) * math. sin(delta_lon / 2) ** 2
+                math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
             )
             
             central_angle = 2 * math.atan2(math.sqrt(haversine_a), math.sqrt(1 - haversine_a))
@@ -125,7 +125,7 @@ class GreatCircleCalculator:
         """
         Calculate initial compass bearing from origin to destination.
         
-        Returns bearing in degrees (0-360) where 0° is North, 90° is East. 
+        Returns bearing in degrees (0-360) where 0° is North, 90° is East.
         Essential for navigation planning and waypoint calculations.
         
         Args:
@@ -140,7 +140,7 @@ class GreatCircleCalculator:
         delta_lon_rad = math.radians(destination.longitude - origin.longitude)
         
         # Calculate bearing using spherical trigonometry
-        y = math.sin(delta_lon_rad) * math. cos(lat2_rad)
+        y = math.sin(delta_lon_rad) * math.cos(lat2_rad)
         x = (
             math.cos(lat1_rad) * math.sin(lat2_rad) -
             math.sin(lat1_rad) * math.cos(lat2_rad) * math.cos(delta_lon_rad)
@@ -167,7 +167,7 @@ class GreatCircleCalculator:
         Args:
             origin: Starting coordinates
             destination: Ending coordinates
-            fraction: Position along route (0. 0 = origin, 1.0 = destination)
+            fraction: Position along route (0.0 = origin, 1.0 = destination)
             
         Returns:
             Intermediate coordinates
@@ -181,10 +181,10 @@ class GreatCircleCalculator:
             return destination
         
         # Convert to radians
-        lat1 = math.radians(origin. latitude)
+        lat1 = math.radians(origin.latitude)
         lon1 = math.radians(origin.longitude)
         lat2 = math.radians(destination.latitude)
-        lon2 = math.radians(destination. longitude)
+        lon2 = math.radians(destination.longitude)
         
         # Calculate intermediate point using spherical interpolation
         delta = cls.calculate_distance_nautical_miles(origin, destination) / cls.EARTH_RADIUS_NAUTICAL_MILES
@@ -216,7 +216,7 @@ class FuelConsumptionCalculator:
     # Fuel consumption characteristics by vessel type (tons per day at sea speed)
     BASE_CONSUMPTION_RATES = {
         "container": {
-            "main_engine_tons_per_day": 150. 0,
+            "main_engine_tons_per_day": 150.0,
             "auxiliary_tons_per_day": 15.0,
             "speed_power_curve_exponent": 3.2
         },
@@ -273,14 +273,14 @@ class FuelConsumptionCalculator:
             if distance_nm <= 0:
                 raise ValueError("Distance must be positive")
             
-            if not 0. 5 <= weather_factor <= 2.0:
-                raise ValueError("Weather factor must be between 0. 5 and 2.0")
+            if not 0.5 <= weather_factor <= 2.0:
+                raise ValueError("Weather factor must be between 0.5 and 2.0")
             
             if not 0.0 <= load_factor <= 1.0:
-                raise ValueError("Load factor must be between 0. 0 and 1.0")
+                raise ValueError("Load factor must be between 0.0 and 1.0")
             
             # Get base consumption rates for vessel type
-            vessel_type_key = vessel_constraints.vessel_type. value
+            vessel_type_key = vessel_constraints.vessel_type.value
             if vessel_type_key not in cls.BASE_CONSUMPTION_RATES:
                 vessel_type_key = "container"  # Default fallback
                 logger.warning(f"Unknown vessel type, using container defaults: {vessel_constraints.vessel_type}")
@@ -296,8 +296,8 @@ class FuelConsumptionCalculator:
             
             # Calculate speed adjustment factor (cubic relationship)
             # Fuel consumption increases exponentially with speed
-            design_speed = 20. 0  # knots - typical design speed for base consumption
-            speed_factor = math. pow(
+            design_speed = 20.0  # knots - typical design speed for base consumption
+            speed_factor = math.pow(
                 vessel_constraints.cruise_speed_knots / design_speed,
                 rates["speed_power_curve_exponent"]
             )
@@ -325,7 +325,7 @@ class FuelConsumptionCalculator:
             total_consumption = main_engine_consumption + auxiliary_consumption
             
             # Apply minimum consumption threshold (vessel systems always consume fuel)
-            minimum_consumption = transit_time_days * 5. 0  # 5 tons/day minimum
+            minimum_consumption = transit_time_days * 5.0  # 5 tons/day minimum
             total_consumption = max(total_consumption, minimum_consumption)
             
             # Round to appropriate precision (0.1 tons)
@@ -365,7 +365,7 @@ class FuelConsumptionCalculator:
                 carbon_content_kg_per_kg=0.85,
                 sulfur_content_percent=0.5,
                 price_per_ton_usd=Decimal('450'),
-                availability_score=0. 95
+                availability_score=0.95
             ),
             FuelType.MARINE_GAS_OIL: FuelCharacteristics(
                 energy_density_mj_per_kg=43.0,
@@ -390,7 +390,7 @@ class FuelConsumptionCalculator:
             )
         }
         
-        return fuel_data.get(fuel_type, fuel_data[FuelType. HEAVY_FUEL_OIL])
+        return fuel_data.get(fuel_type, fuel_data[FuelType.HEAVY_FUEL_OIL])
 
 
 class PortFeeCalculator:
@@ -504,7 +504,7 @@ class PortFeeCalculator:
                 }
             )
             
-            return total_fees. quantize(Decimal('0. 01'), rounding=ROUND_HALF_UP)
+            return total_fees.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             
         except Exception as e:
             logger.error("Port fee calculation failed", error=str(e))
@@ -524,7 +524,7 @@ class PortFeeCalculator:
         # Simple heuristic based on port characteristics
         # In production, this would use a comprehensive port database
         
-        facilities_count = len(port.facilities. get('cargo_handling', []))
+        facilities_count = len(port.facilities.get('cargo_handling', []))
         berths = port.berths_count
         
         # Major international hubs
@@ -582,7 +582,7 @@ class PortFeeCalculator:
         base_rate_per_meter_per_day = Decimal('50')  # USD per meter per day
         
         # Convert hours to days for calculation
-        port_time_days = max(port_time_hours / 24. 0, 0.5)  # Minimum 0.5 day charge
+        port_time_days = max(port_time_hours / 24.0, 0.5)  # Minimum 0.5 day charge
         
         return (
             base_rate_per_meter_per_day * 
@@ -604,7 +604,7 @@ class PortFeeCalculator:
         if vessel.deadweight_tonnage:
             if vessel.deadweight_tonnage > 100000:
                 size_factor = 1.5
-            elif vessel. deadweight_tonnage > 50000:
+            elif vessel.deadweight_tonnage > 50000:
                 size_factor = 1.2
             else:
                 size_factor = 1.0
@@ -668,7 +668,7 @@ class TransitTimeEstimator:
         vessel_speed_knots: float,
         weather_factor: float = 1.0,
         traffic_factor: float = 1.0,
-        seasonal_factor: float = 1. 0
+        seasonal_factor: float = 1.0
     ) -> Decimal:
         """
         Estimate realistic transit time with operational factors.
@@ -703,7 +703,7 @@ class TransitTimeEstimator:
             
             total_time = adjusted_time + operational_buffer
             
-            return Decimal(str(total_time)). quantize(
+            return Decimal(str(total_time)).quantize(
                 Decimal('0.1'), 
                 rounding=ROUND_HALF_UP
             )
@@ -721,14 +721,14 @@ def calculate_great_circle_distance(origin: Coordinates, destination: Coordinate
 
 def estimate_fuel_consumption(distance_nm: float, vessel_constraints: VesselConstraints) -> Decimal:
     """Estimate fuel consumption for route segment (convenience function)."""
-    return FuelConsumptionCalculator. estimate_consumption(distance_nm, vessel_constraints)
+    return FuelConsumptionCalculator.estimate_consumption(distance_nm, vessel_constraints)
 
 
 def calculate_port_fees(port: Port, vessel_constraints: VesselConstraints) -> Decimal:
     """Calculate port fees for vessel call (convenience function)."""
-    return PortFeeCalculator. calculate_total_fees(port, vessel_constraints)
+    return PortFeeCalculator.calculate_total_fees(port, vessel_constraints)
 
 
 def estimate_transit_time(distance_nm: float, vessel_speed_knots: float) -> Decimal:
     """Estimate transit time for route segment (convenience function)."""
-    return TransitTimeEstimator. estimate_transit_time(distance_nm, vessel_speed_knots)
+    return TransitTimeEstimator.estimate_transit_time(distance_nm, vessel_speed_knots)

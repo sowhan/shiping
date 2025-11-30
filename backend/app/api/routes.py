@@ -40,8 +40,8 @@ async def get_db_manager() -> DatabaseManager:
 
 async def get_route_planner() -> MaritimeRoutePlanner:
     """Dependency injection for route planning service."""
-    from app. main import app
-    return app. state.route_planner
+    from app.main import app
+    return app.state.route_planner
 
 
 @router.post(
@@ -107,8 +107,8 @@ async def calculate_maritime_routes(
             "🧭 API route calculation started",
             origin=route_request.origin_port_code,
             destination=route_request.destination_port_code,
-            vessel_type=route_request.vessel_constraints.vessel_type. value,
-            optimization=route_request.optimization_criteria. value
+            vessel_type=route_request.vessel_constraints.vessel_type.value,
+            optimization=route_request.optimization_criteria.value
         )
         
         # Execute route calculation with performance monitoring
@@ -124,7 +124,7 @@ async def calculate_maritime_routes(
             origin=route_request.origin_port_code,
             destination=route_request.destination_port_code,
             calculation_duration_ms=round(calculation_duration * 1000, 2),
-            routes_found=len(route_response. alternative_routes) + 1,
+            routes_found=len(route_response.alternative_routes) + 1,
             primary_cost_usd=float(route_response.primary_route.total_cost_usd),
             cache_hit=route_response.cache_hit
         )
@@ -150,7 +150,7 @@ async def calculate_maritime_routes(
     except TimeoutError:
         logger.error(
             "Route calculation timeout",
-            origin=route_request. origin_port_code,
+            origin=route_request.origin_port_code,
             destination=route_request.destination_port_code,
             timeout_seconds=route_request.calculation_timeout_seconds
         )
@@ -164,12 +164,12 @@ async def calculate_maritime_routes(
         )
     
     except Exception as internal_error:
-        calculation_duration = (datetime.utcnow() - calculation_start). total_seconds()
+        calculation_duration = (datetime.utcnow() - calculation_start).total_seconds()
         
         logger.error(
             "Route calculation failed - internal error",
             error=str(internal_error),
-            origin=route_request. origin_port_code,
+            origin=route_request.origin_port_code,
             destination=route_request.destination_port_code,
             calculation_duration_ms=round(calculation_duration * 1000, 2),
             exc_info=True
@@ -229,7 +229,7 @@ async def validate_route_parameters(
         
         validation_duration = (datetime.utcnow() - validation_start).total_seconds()
         
-        logger. info(
+        logger.info(
             "Route parameters validated",
             origin=route_request.origin_port_code,
             destination=route_request.destination_port_code,
@@ -240,8 +240,8 @@ async def validate_route_parameters(
         return {
             "valid": validation_result["valid"],
             "validation_details": validation_result["details"],
-            "estimated_calculation_time_seconds": validation_result. get("estimated_time", 2.0),
-            "validation_timestamp": datetime.utcnow(). isoformat()
+            "estimated_calculation_time_seconds": validation_result.get("estimated_time", 2.0),
+            "validation_timestamp": datetime.utcnow().isoformat()
         }
         
     except Exception as e:
@@ -287,7 +287,7 @@ async def search_maritime_ports(
     Search maritime ports with intelligent matching and filtering.
     
     Implements fuzzy search across port names and codes with relevance
-    ranking.  Supports advanced filtering by country, vessel type, and status.
+    ranking. Supports advanced filtering by country, vessel type, and status.
     
     Args:
         query: Search term (port name, code, or location)
@@ -378,7 +378,7 @@ async def search_maritime_ports(
             )
             ports.append(port)
         
-        search_duration = (datetime.utcnow() - search_start). total_seconds()
+        search_duration = (datetime.utcnow() - search_start).total_seconds()
         
         logger.info(
             "✅ Port search completed",
@@ -390,7 +390,7 @@ async def search_maritime_ports(
         return ports
         
     except Exception as e:
-        search_duration = (datetime.utcnow() - search_start). total_seconds()
+        search_duration = (datetime.utcnow() - search_start).total_seconds()
         
         logger.error(
             "Port search failed",
@@ -413,7 +413,7 @@ async def _validate_route_request(
     detailed: bool = False
 ) -> dict:
     """
-    Comprehensive route request validation. 
+    Comprehensive route request validation.
     
     Args:
         route_request: Route request to validate
@@ -447,7 +447,7 @@ async def _validate_route_request(
         raise ValueError("Vessel speed must be between 0 and 40 knots")
     
     # Validate temporal constraints
-    if route_request. departure_time < datetime.utcnow():
+    if route_request.departure_time < datetime.utcnow():
         raise ValueError("Departure time cannot be in the past")
     
     # Additional detailed validation for validate endpoint
