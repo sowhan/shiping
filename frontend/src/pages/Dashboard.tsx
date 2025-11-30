@@ -1,16 +1,18 @@
 /**
  * Dashboard Page
- * Main route planning dashboard with search and results
+ * Main route planning dashboard with search, results, and map visualization
  */
 
 import React from 'react';
-import { Ship, Globe, Activity, Users } from 'lucide-react';
-import { RouteSearchPanel, RouteResults, RouteDetails } from '../components/maritime';
+import { Link, useLocation } from 'react-router-dom';
+import { Ship, Globe, Activity, Users, Map } from 'lucide-react';
+import { RouteSearchPanel, RouteResults, RouteDetails, MaritimeMap } from '../components/maritime';
 import { Card, CardContent } from '../components/ui';
 import { useRouteStore } from '../store/routeStore';
 
 const Dashboard: React.FC = () => {
-  const { currentRoute, isCalculating } = useRouteStore();
+  const location = useLocation();
+  const { currentRoute } = useRouteStore();
 
   const stats = [
     { icon: Globe, label: 'Global Coverage', value: '50,000+ Ports', color: 'text-blue-500' },
@@ -19,14 +21,21 @@ const Dashboard: React.FC = () => {
     { icon: Users, label: 'Active Users', value: '10,000+', color: 'text-orange-500' },
   ];
 
+  const navLinks = [
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/routes', label: 'Routes' },
+    { path: '/ports', label: 'Ports' },
+    { path: '/analytics', label: 'Analytics' },
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Header */}
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-maritime-blue-500 rounded-lg">
+              <div className="p-2 bg-blue-600 rounded-lg">
                 <Ship className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -35,10 +44,19 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <nav className="flex items-center gap-4">
-              <a href="#" className="text-sm font-medium text-maritime-blue-500">Dashboard</a>
-              <a href="#" className="text-sm font-medium text-slate-600 hover:text-slate-800">Routes</a>
-              <a href="#" className="text-sm font-medium text-slate-600 hover:text-slate-800">Ports</a>
-              <a href="#" className="text-sm font-medium text-slate-600 hover:text-slate-800">Analytics</a>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-sm font-medium transition-colors ${
+                    location.pathname === link.path || (link.path === '/dashboard' && location.pathname === '/')
+                      ? 'text-blue-600'
+                      : 'text-slate-600 hover:text-slate-800'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
             </nav>
           </div>
         </div>
@@ -62,15 +80,21 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-12 gap-6">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        <div className="grid grid-cols-12 gap-6 h-full">
           {/* Left Column - Search Panel */}
           <div className="col-span-12 lg:col-span-4">
             <RouteSearchPanel />
           </div>
 
-          {/* Right Column - Results */}
+          {/* Right Column - Map and Results */}
           <div className="col-span-12 lg:col-span-8">
+            {/* Map Section */}
+            <Card className="mb-6">
+              <MaritimeMap className="h-64 lg:h-80 rounded-xl" />
+            </Card>
+
+            {/* Results Section */}
             {currentRoute ? (
               <div className="space-y-6">
                 <RouteResults />
@@ -79,8 +103,8 @@ const Dashboard: React.FC = () => {
             ) : (
               <Card>
                 <CardContent>
-                  <div className="text-center py-16">
-                    <Globe className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+                  <div className="text-center py-12">
+                    <Map className="w-16 h-16 mx-auto text-slate-300 mb-4" />
                     <h3 className="text-lg font-medium text-slate-700 mb-2">
                       Plan Your Maritime Route
                     </h3>
@@ -102,7 +126,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center justify-between text-sm text-slate-500">
             <p>© 2024 Maritime Route Planner. All rights reserved.</p>
             <div className="flex items-center gap-4">
-              <a href="#" className="hover:text-slate-700">API Documentation</a>
+              <a href="/docs" className="hover:text-slate-700">API Documentation</a>
               <a href="#" className="hover:text-slate-700">Support</a>
               <a href="#" className="hover:text-slate-700">Privacy Policy</a>
             </div>

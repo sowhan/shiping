@@ -13,6 +13,8 @@ import structlog
 
 from app.core.config import settings
 from app.core.database import DatabaseManager
+from app.core.cache import cache_service
+from app.core.rate_limiter import RateLimitMiddleware
 from app.services.route_planner import MaritimeRoutePlanner
 from app.api.routes import router as routes_router
 
@@ -38,8 +40,8 @@ async def lifespan(app: FastAPI):
     """
     Application lifespan manager.
     
-    Handles startup and shutdown events for database connections
-    and service initialization.
+    Handles startup and shutdown events for database connections,
+    Redis cache, and service initialization.
     """
     startup_time = datetime.utcnow()
     
@@ -49,23 +51,30 @@ async def lifespan(app: FastAPI):
                 environment=settings.environment)
     
     try:
+        # Initialize database
         db_manager = DatabaseManager()
         await db_manager.connect()
         app.state.db_manager = db_manager
         
-        # Initialize route planner service
-        route_planner = MaritimeRoutePlanner(db_manager)
+        # Initialize Redis cache
+        await cache_service.connect()
+        app.state.cache_service = cache_service
+        
+        # Initialize route planner service with cache
+        route_planner = MaritimeRoutePlanner(db_manager, cache_service)
         app.state.route_planner = route_planner
         
         # Store startup time for uptime calculation
         app.state.startup_time = startup_time
         
         logger.info("✅ Application startup complete",
-                   database_connected=db_manager.is_connected)
+                   database_connected=db_manager.is_connected,
+                   cache_connected=cache_service.is_connected)
     except Exception as e:
         logger.error("❌ Startup failed", error=str(e))
         # Continue without database for health check availability
         app.state.db_manager = None
+        app.state.cache_service = None
         app.state.route_planner = None
         app.state.startup_time = startup_time
     
@@ -75,6 +84,8 @@ async def lifespan(app: FastAPI):
     logger.info("🛑 Shutting down Maritime Route Planner API")
     if hasattr(app.state, 'db_manager') and app.state.db_manager:
         await app.state.db_manager.disconnect()
+    if hasattr(app.state, 'cache_service') and app.state.cache_service:
+        await app.state.cache_service.disconnect()
     logger.info("✅ Shutdown complete")
 
 
@@ -91,11 +102,14 @@ app = FastAPI(
     - **Real-time optimization**: Weather, traffic, and cost factors
     - **Global port coverage**: 50,000+ ports worldwide
     - **Sub-500ms performance**: Optimized for production workloads
+    - **JWT Authentication**: Secure access with role-based permissions
+    - **Rate Limiting**: Protection against API abuse
     
     ### Endpoints:
     - `/api/v1/routes/calculate` - Calculate optimal maritime routes
     - `/api/v1/routes/validate` - Validate route parameters
     - `/api/v1/ports/search` - Search maritime ports
+    - `/api/v1/auth/login` - Authenticate and get tokens
     - `/health` - System health check
     """,
     version=settings.app_version,
@@ -103,6 +117,14 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
     lifespan=lifespan
+)
+
+# Add Rate Limiting Middleware
+app.add_middleware(
+    RateLimitMiddleware,
+    requests_per_minute=60,
+    requests_per_hour=1000,
+    burst_limit=10
 )
 
 # Configure CORS
@@ -128,7 +150,7 @@ async def health_check():
     System health check endpoint.
     
     Returns:
-        Health status with database and service connectivity
+        Health status with database, cache, and service connectivity
     """
     uptime = 0.0
     if hasattr(app.state, 'startup_time') and app.state.startup_time:
@@ -141,14 +163,27 @@ async def health_check():
         except Exception:
             pass
     
+    cache_connected = False
+    if hasattr(app.state, 'cache_service') and app.state.cache_service:
+        try:
+            cache_connected = await app.state.cache_service.health_check()
+        except Exception:
+            pass
+    
+    status = "healthy"
+    if not db_connected:
+        status = "degraded"
+    if not cache_connected:
+        status = "degraded" if status == "healthy" else status
+    
     return {
-        "status": "healthy" if db_connected else "degraded",
+        "status": status,
         "version": settings.app_version,
         "environment": settings.environment,
         "timestamp": datetime.utcnow().isoformat(),
         "uptime_seconds": round(uptime, 2),
         "database_connected": db_connected,
-        "cache_connected": False  # Redis not implemented yet
+        "cache_connected": cache_connected
     }
 
 

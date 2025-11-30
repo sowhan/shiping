@@ -8,11 +8,12 @@ Features:
 - Real-time weather and traffic integration
 - Hub-based routing through strategic ports
 - Comprehensive vessel constraint handling
+- Redis-backed caching for distributed performance
 """
 
 import asyncio
 import logging
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Optional, Dict, Any, Tuple, TYPE_CHECKING
 from datetime import datetime, timedelta
 from decimal import Decimal
 import uuid
@@ -33,6 +34,9 @@ from app.utils.maritime_calculations import (
     calculate_port_fees, estimate_transit_time
 )
 
+if TYPE_CHECKING:
+    from app.core.cache import CacheService
+
 logger = structlog.get_logger(__name__)
 
 
@@ -52,8 +56,9 @@ class MaritimeRoutePlanner:
     - Cache hit ratio: >95% for repeated requests
     """
     
-    def __init__(self, db_manager: DatabaseManager):
+    def __init__(self, db_manager: DatabaseManager, cache_service: Optional["CacheService"] = None):
         self.db_manager = db_manager
+        self.cache_service = cache_service
         
         # Performance tracking
         self.calculation_stats = {
@@ -63,7 +68,7 @@ class MaritimeRoutePlanner:
             "cache_misses": 0
         }
         
-        # In-memory caches for performance
+        # In-memory caches for performance (fallback when Redis unavailable)
         self._port_cache: Dict[str, Port] = {}
         self._route_cache: Dict[str, RouteResponse] = {}
         self._distance_cache: Dict[Tuple[str, str], float] = {}
