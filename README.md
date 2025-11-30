@@ -15,28 +15,153 @@ Enterprise-grade maritime route planning platform that provides intelligent rout
 
 ```
 maritime-route-planner/
-├── backend/                 # FastAPI Python backend
-│   ├── app/
-│   │   ├── api/            # REST API endpoints
-│   │   ├── core/           # Configuration and database
-│   │   ├── models/         # Pydantic data models
-│   │   ├── services/       # Business logic services
-│   │   └── utils/          # Utility functions
+├── README.md                           # This comprehensive guide
+├── .gitignore                          # Git exclusions
+├── .env.example                        # Environment variable template
+├── docker-compose.yml                  # Local development orchestration
+├── docker-compose.prod.yml             # Production deployment configuration
+├── Makefile                            # Development automation
+├── VERSION                             # Semantic versioning (1.0.0)
+├── LICENSE                             # MIT license
+│
+├── docs/                               # 📚 Documentation
+│   ├── architecture/                   # System design documents
+│   │   ├── system-overview.md
+│   │   ├── database-schema.md
+│   │   ├── api-design.md
+│   │   ├── performance-requirements.md
+│   │   ├── security-architecture.md
+│   │   └── maritime-algorithms.md
+│   ├── deployment/                     # Deployment guides
+│   │   ├── local-setup.md
+│   │   ├── docker-deployment.md
+│   │   ├── kubernetes-deployment.md
+│   │   ├── aws-deployment.md
+│   │   ├── monitoring-setup.md
+│   │   └── security-hardening.md
+│   ├── api/                            # API documentation
+│   │   ├── routes-api.md
+│   │   ├── ports-api.md
+│   │   ├── vessels-api.md
+│   │   ├── analytics-api.md
+│   │   ├── authentication.md
+│   │   └── websockets.md
+│   └── user-guides/                    # End-user documentation
+│       ├── getting-started.md
+│       ├── route-planning.md
+│       ├── advanced-features.md
+│       ├── troubleshooting.md
+│       └── maritime-concepts.md
+│
+├── backend/                            # 🚀 FastAPI Python Backend
+│   ├── README.md
+│   ├── requirements.txt                # Production dependencies
+│   ├── requirements-dev.txt            # Development dependencies
+│   ├── pyproject.toml                  # Project configuration
 │   ├── Dockerfile
-│   └── requirements.txt
-├── frontend/               # React TypeScript frontend
-│   ├── src/
-│   │   ├── components/     # UI components
-│   │   ├── pages/          # Application pages
-│   │   ├── services/       # API services
-│   │   ├── store/          # State management
-│   │   └── types/          # TypeScript types
+│   ├── pytest.ini
+│   ├── mypy.ini
+│   ├── .pre-commit-config.yaml
+│   ├── alembic.ini
+│   └── app/
+│       ├── __init__.py
+│       ├── main.py                     # FastAPI entry point
+│       ├── version.py                  # Version management
+│       ├── core/                       # Core infrastructure
+│       │   ├── config.py               # Configuration
+│       │   ├── database.py             # PostgreSQL + asyncpg
+│       │   ├── cache.py                # Redis caching
+│       │   ├── security.py             # JWT authentication
+│       │   ├── rate_limiter.py         # Rate limiting
+│       │   ├── logging.py              # Structured logging
+│       │   ├── metrics.py              # Prometheus metrics
+│       │   ├── middleware.py           # Custom middleware
+│       │   └── exceptions.py           # Custom exceptions
+│       ├── models/                     # Pydantic models
+│       │   └── maritime.py
+│       ├── services/                   # Business logic
+│       │   └── route_planner.py
+│       ├── api/                        # REST API endpoints
+│       │   └── routes.py
+│       ├── utils/                      # Utilities
+│       │   ├── maritime_calculations.py
+│       │   └── performance.py
+│       ├── workers/                    # Background tasks
+│       │   ├── route_calculator.py
+│       │   └── data_updater.py
+│       ├── tests/                      # Test suite
+│       │   ├── conftest.py
+│       │   ├── unit/
+│       │   ├── integration/
+│       │   └── performance/
+│       ├── migrations/                 # Database migrations
+│       │   └── versions/
+│       └── scripts/                    # Automation scripts
+│           ├── start-dev.py
+│           ├── start-prod.py
+│           ├── db-setup.py
+│           ├── performance-benchmark.py
+│           └── health-check.py
+│
+├── frontend/                           # ⚛️ React TypeScript Frontend
+│   ├── README.md
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   ├── tailwind.config.js
 │   ├── Dockerfile
-│   └── package.json
-├── database/               # PostgreSQL + PostGIS schema
-│   └── init.sql
-├── docker-compose.yml      # Container orchestration
-└── README.md
+│   └── src/
+│       ├── main.tsx                    # Entry point
+│       ├── App.tsx                     # Root component
+│       ├── index.css
+│       ├── components/                 # UI Components
+│       │   ├── ui/                     # Generic UI
+│       │   │   ├── Button.tsx
+│       │   │   ├── Input.tsx
+│       │   │   └── Card.tsx
+│       │   ├── maritime/               # Maritime-specific
+│       │   │   ├── RouteSearchPanel.tsx
+│       │   │   ├── RouteResults.tsx
+│       │   │   ├── RouteDetails.tsx
+│       │   │   └── MaritimeMap.tsx
+│       │   └── layout/                 # Layout components
+│       ├── pages/                      # Application pages
+│       │   ├── Dashboard.tsx
+│       │   ├── RouteHistory.tsx
+│       │   ├── PortDirectory.tsx
+│       │   └── Settings.tsx
+│       ├── hooks/                      # Custom React hooks
+│       │   ├── useRouteCalculation.ts
+│       │   ├── usePortSearch.ts
+│       │   ├── useDebounce.ts
+│       │   └── useLocalStorage.ts
+│       ├── services/                   # API services
+│       │   └── api.ts
+│       ├── store/                      # State management
+│       │   └── routeStore.ts
+│       ├── types/                      # TypeScript types
+│       │   └── maritime.ts
+│       ├── utils/                      # Utilities
+│       │   ├── formatters.ts
+│       │   ├── validators.ts
+│       │   └── constants.ts
+│       ├── styles/                     # CSS styles
+│       │   ├── globals.css
+│       │   ├── maritime-theme.css
+│       │   └── animations.css
+│       └── tests/                      # Frontend tests
+│
+├── database/                           # 🗄️ Database Schema
+│   ├── init.sql                        # Initial schema
+│   ├── seed-data/                      # Sample data
+│   ├── migrations/                     # Version control
+│   └── backups/                        # Backup scripts
+│
+└── infrastructure/                     # 🏗️ Infrastructure
+    ├── docker/                         # Container definitions
+    ├── kubernetes/                     # K8s manifests
+    ├── terraform/                      # Cloud infrastructure
+    └── scripts/                        # Deployment scripts
 ```
 
 ## 🚀 Quick Start

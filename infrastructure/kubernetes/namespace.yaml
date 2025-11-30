@@ -1,0 +1,8 @@
+# Kubernetes Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: maritime
+  labels:
+    app: maritime-routes
+    environment: production

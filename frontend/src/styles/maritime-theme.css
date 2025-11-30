@@ -1,0 +1,96 @@
+/**
+ * Maritime Theme CSS
+ * Color palette and typography for maritime applications.
+ */
+
+/* Maritime Color Palette */
+.maritime-blue {
+  color: #0284c7;
+}
+
+.maritime-navy {
+  color: #1e293b;
+}
+
+.maritime-ocean {
+  color: #0ea5e9;
+}
+
+/* Status Colors */
+.status-success {
+  color: #22c55e;
+}
+
+.status-warning {
+  color: #f59e0b;
+}
+
+.status-error {
+  color: #ef4444;
+}
+
+.status-info {
+  color: #3b82f6;
+}
+
+/* Maritime Gradients */
+.gradient-ocean {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+}
+
+.gradient-sunset {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+}
+
+.gradient-deep-sea {
+  background: linear-gradient(180deg, #0c4a6e 0%, #0f172a 100%);
+}
+
+/* Typography */
+.text-maritime-heading {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.text-maritime-body {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.625;
+}
+
+.text-maritime-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Card Styles */
+.card-maritime {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.card-maritime:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Button Variants */
+.btn-maritime {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-maritime:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+}
+
+.btn-maritime:active {
+  transform: translateY(0);
+}

@@ -2,16 +2,16 @@
  * Route Store - Zustand state management for route planning
  */
 
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
-import type {
+import { create, StateCreator } from 'zustand';
+import { devtools, persist, PersistOptions } from 'zustand/middleware';
+import {
   RouteResponse,
   DetailedRoute,
   RouteRequest,
   Port,
   OptimizationCriteria,
   VesselConstraints,
-  DEFAULT_VESSEL_CONSTRAINTS,
+  VesselType,
 } from '../types/maritime';
 import { api } from '../services/api';
 
@@ -50,7 +50,7 @@ interface RouteState {
 }
 
 const initialVesselConstraints: VesselConstraints = {
-  vessel_type: 'container' as any,
+  vessel_type: VesselType.CONTAINER,
   length_meters: 300,
   beam_meters: 45,
   draft_meters: 14,
@@ -62,9 +62,14 @@ const initialVesselConstraints: VesselConstraints = {
   panama_canal_compatible: true,
 };
 
+type RouteStorePersist = (
+  config: StateCreator<RouteState>,
+  options: PersistOptions<RouteState, Partial<RouteState>>
+) => StateCreator<RouteState>;
+
 export const useRouteStore = create<RouteState>()(
   devtools(
-    persist(
+    (persist as RouteStorePersist)(
       (set, get) => ({
         // Initial state
         isCalculating: false,
@@ -81,18 +86,18 @@ export const useRouteStore = create<RouteState>()(
         maxStops: 2,
 
         // Actions
-        setOriginPort: (port) => set({ originPort: port }),
-        setDestinationPort: (port) => set({ destinationPort: port }),
+        setOriginPort: (port: Port | null) => set({ originPort: port }),
+        setDestinationPort: (port: Port | null) => set({ destinationPort: port }),
         
-        setVesselConstraints: (constraints) => 
-          set((state) => ({
+        setVesselConstraints: (constraints: Partial<VesselConstraints>) => 
+          set((state: RouteState) => ({
             vesselConstraints: { ...state.vesselConstraints, ...constraints },
           })),
         
-        setOptimizationCriteria: (criteria) => set({ optimizationCriteria: criteria }),
+        setOptimizationCriteria: (criteria: OptimizationCriteria) => set({ optimizationCriteria: criteria }),
         
-        setOptions: (options) => 
-          set((state) => ({
+        setOptions: (options: { includeAlternatives?: boolean; maxAlternatives?: number; maxStops?: number }) => 
+          set((state: RouteState) => ({
             includeAlternatives: options.includeAlternatives ?? state.includeAlternatives,
             maxAlternatives: options.maxAlternatives ?? state.maxAlternatives,
             maxStops: options.maxStops ?? state.maxStops,
@@ -123,19 +128,20 @@ export const useRouteStore = create<RouteState>()(
 
             const response = await api.routes.calculateRoutes(request);
 
-            set((prevState) => ({
+            set((prevState: RouteState) => ({
               currentRoute: response,
               selectedRoute: response.primary_route,
               recentRoutes: [response, ...prevState.recentRoutes.slice(0, 9)],
               isCalculating: false,
             }));
-          } catch (err: any) {
-            const errorMessage = err.response?.data?.message || err.message || 'Route calculation failed';
+          } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } }; message?: string };
+            const errorMessage = error.response?.data?.message || error.message || 'Route calculation failed';
             set({ error: errorMessage, isCalculating: false });
           }
         },
 
-        selectRoute: (route) => set({ selectedRoute: route }),
+        selectRoute: (route: DetailedRoute) => set({ selectedRoute: route }),
         
         clearRoute: () => set({ currentRoute: null, selectedRoute: null }),
         
@@ -143,7 +149,7 @@ export const useRouteStore = create<RouteState>()(
       }),
       {
         name: 'route-store',
-        partialize: (state) => ({
+        partialize: (state: RouteState) => ({
           vesselConstraints: state.vesselConstraints,
           optimizationCriteria: state.optimizationCriteria,
           includeAlternatives: state.includeAlternatives,

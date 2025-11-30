@@ -1,0 +1,42 @@
+[
+  {
+    "unlocode": "SGSIN",
+    "name": "Singapore",
+    "country": "Singapore",
+    "latitude": 1.2644,
+    "longitude": 103.8220,
+    "port_type": "major_hub"
+  },
+  {
+    "unlocode": "NLRTM",
+    "name": "Rotterdam",
+    "country": "Netherlands",
+    "latitude": 51.9225,
+    "longitude": 4.4792,
+    "port_type": "major_hub"
+  },
+  {
+    "unlocode": "CNSHA",
+    "name": "Shanghai",
+    "country": "China",
+    "latitude": 31.2304,
+    "longitude": 121.4737,
+    "port_type": "major_hub"
+  },
+  {
+    "unlocode": "DEHAM",
+    "name": "Hamburg",
+    "country": "Germany",
+    "latitude": 53.5511,
+    "longitude": 9.9937,
+    "port_type": "major_hub"
+  },
+  {
+    "unlocode": "USNYC",
+    "name": "New York",
+    "country": "United States",
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "port_type": "major_hub"
+  }
+]

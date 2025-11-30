@@ -1,0 +1,17 @@
+# ConfigMap for Maritime Application
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maritime-config
+  namespace: maritime
+data:
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "json"
+  API_V1_PREFIX: "/api/v1"
+  CORS_ORIGINS: "https://maritime-routes.com,https://www.maritime-routes.com"
+  DATABASE_POOL_SIZE: "20"
+  DATABASE_MAX_OVERFLOW: "10"
+  CACHE_TTL_SECONDS: "1800"
+  ROUTE_CALCULATION_TIMEOUT_SECONDS: "30"
+  MAX_ROUTE_ALTERNATIVES: "5"
