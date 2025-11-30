@@ -7,7 +7,7 @@ import pytest
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from app.models.maritime import Coordinates, VesselConstraints
+from app.models.maritime import Coordinates, VesselConstraints, VesselType
 from app.utils.maritime_calculations import (
     GreatCircleCalculator,
     FuelConsumptionCalculator,
@@ -64,7 +64,7 @@ class TestFuelConsumptionCalculations:
     def test_fuel_consumption_estimation(self):
         """Test fuel consumption estimation."""
         vessel = VesselConstraints(
-            vessel_type="container",
+            vessel_type=VesselType.CONTAINER,
             length_meters=300,
             beam_meters=45,
             draft_meters=14,
