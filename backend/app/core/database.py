@@ -1,6 +1,11 @@
 """
 Database Management
 PostgreSQL + asyncpg connection management with connection pooling.
+
+Performance Targets (as per KPIs):
+- Port searches: <100ms (99th percentile)
+- Spatial queries: <50ms average with PostGIS optimization
+- Connection pool: 10-50 connections with overflow support
 """
 
 import asyncio
@@ -20,9 +25,14 @@ class DatabaseManager:
     Async database manager with connection pooling.
     
     Provides efficient database access with:
-    - Connection pooling for performance
+    - Connection pooling for performance (10-50 connections)
     - Automatic reconnection handling
     - Query execution with error handling
+    - Performance monitoring for KPI compliance
+    
+    Performance Targets:
+    - Port searches: <100ms (99th percentile)
+    - Spatial queries: <50ms average
     """
     
     def __init__(self, database_url: Optional[str] = None):
@@ -33,21 +43,48 @@ class DatabaseManager:
         )
         self._pool: Optional[asyncpg.Pool] = None
         self._connected = False
+        
+        # Performance tracking
+        self._query_stats = {
+            "total_queries": 0,
+            "avg_query_time_ms": 0.0,
+            "max_query_time_ms": 0.0,
+            "cache_hits": 0,
+            "pool_size_current": 0
+        }
     
     async def connect(self) -> None:
-        """Initialize database connection pool."""
+        """
+        Initialize database connection pool.
+        
+        Pool configuration per KPI requirements:
+        - min_size: 10 (ensure quick availability)
+        - max_size: 50 (handle peak load)
+        - max_inactive_connection_lifetime: 300s
+        """
         if self._pool is not None:
             return
         
         try:
+            # Configure pool for KPI compliance: 10-50 connections
+            pool_min = max(10, settings.database_pool_size // 2)
+            pool_max = min(50, settings.database_pool_size + settings.database_max_overflow)
+            
             self._pool = await asyncpg.create_pool(
                 self.database_url,
-                min_size=2,
-                max_size=settings.database_pool_size,
-                max_inactive_connection_lifetime=300
+                min_size=pool_min,
+                max_size=pool_max,
+                max_inactive_connection_lifetime=300,
+                command_timeout=30.0,  # 30 second query timeout
+                statement_cache_size=100  # Cache prepared statements
             )
             self._connected = True
-            logger.info("Database connection pool initialized", pool_size=settings.database_pool_size)
+            logger.info(
+                "Database connection pool initialized",
+                pool_min=pool_min,
+                pool_max=pool_max,
+                kpi_target="10-50 connections"
+            )
         except Exception as e:
             logger.error("Failed to connect to database", error=str(e))
             self._connected = False

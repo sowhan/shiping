@@ -166,12 +166,43 @@ curl -X POST "http://localhost:8000/api/v1/routes/calculate" \
 - **Database**: PostGIS for spatial queries
 - **Monitoring**: Structured logging with structlog
 
-## 📈 Performance Targets
+## 📈 Performance Targets & KPI Compliance
 
-- Route calculations: <500ms (95th percentile)
-- Port searches: <100ms (99th percentile)
-- API response times: <200ms average
-- Concurrent users: 10,000+ simultaneous
+This application is designed to meet enterprise-grade performance specifications:
+
+### Route Calculations
+| Metric | Target | Implementation |
+|--------|--------|----------------|
+| Simple routes | <500ms (95th percentile) | Multi-algorithm pathfinding with caching |
+| Complex multi-hop | <3 seconds (95th percentile) | Hub-based routing optimization |
+| Concurrent users | 10,000+ simultaneously | Async architecture with uvloop |
+| Cache hit ratio | >95% for repeated requests | Redis with intelligent TTL strategy |
+
+### Database Operations
+| Metric | Target | Implementation |
+|--------|--------|----------------|
+| Port searches | <100ms (99th percentile) | PostGIS indexes + prepared statements |
+| Spatial queries | <50ms average | GIST indexes with optimization |
+| Connection pool | 10-50 connections | asyncpg with overflow support |
+
+### System Reliability
+| Metric | Target | Implementation |
+|--------|--------|----------------|
+| Uptime SLA | 99.9% | Graceful degradation + health checks |
+| Error rate | <2% under peak load | Comprehensive error handling |
+| Auto-scaling | 100,000+ daily calculations | Kubernetes-ready containerization |
+
+### Business Impact Goals
+| Metric | Target |
+|--------|--------|
+| Cost optimization | 15-25% average shipping cost reduction |
+| Route accuracy | >98% ETA prediction accuracy |
+| User productivity | <3 clicks to generate optimal routes |
+| Global coverage | 50,000+ ports worldwide |
+
+### Monitoring Endpoints
+- `/health` - System health check
+- `/metrics` - Real-time KPI tracking and compliance status
 
 ## 🔒 Security
 
