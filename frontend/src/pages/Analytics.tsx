@@ -186,10 +186,10 @@ export const Analytics: React.FC = () => {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-green-500 h-2 rounded-full"
-                    style={{ width: '68%' }}
+                    style={{ width: `${Math.min(100, (1 - 342 / 500) * 100)}%` }}
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Target: &lt;500ms (68% achieved)</p>
+                <p className="text-xs text-gray-500 mt-1">Target: &lt;500ms ({Math.round((1 - 342 / 500) * 100)}% of target achieved)</p>
               </div>
 
               {/* Cache Hit Ratio */}
