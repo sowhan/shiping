@@ -1,0 +1,30 @@
+# Backend Development Dependencies
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+httpx==0.25.2
+
+# Code Quality
+black==23.11.0
+ruff==0.1.6
+mypy==1.7.1
+pre-commit==3.6.0
+
+# Type Stubs
+types-redis==4.6.0.11
+types-python-jose==3.3.4.8
+
+# Development Tools
+ipython==8.18.1
+rich==13.7.0
+watchfiles==0.21.0
+
+# Documentation
+mkdocs==1.5.3
+mkdocs-material==9.5.2
+
+# Debugging
+debugpy==1.8.0
